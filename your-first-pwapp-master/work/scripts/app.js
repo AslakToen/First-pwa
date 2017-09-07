@@ -169,7 +169,24 @@
     var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' +
         statement;
     // TODO add cache logic here
-
+    if ('caches' in window) {
+      /*
+       * Check if the service worker has already cached this city's weather
+       * data. If the service worker has the data, then display the cached
+       * data while the app fetches the latest data.
+       */
+      caches.match(url).then(function(response) {
+        if (response) {
+          response.json().then(function updateFromCache(json) {
+            var results = json.query.results;
+            results.key = key;
+            results.label = label;
+            results.created = json.query.created;
+            app.updateForecastCard(results);
+          });
+        }
+      });
+    }
     // Fetch the latest data.
     var request = new XMLHttpRequest();
     request.onreadystatechange = function() {
@@ -183,7 +200,7 @@
           app.updateForecastCard(results);
         }
       } else {
-        // Return the initial weather forecast since no data is available.
+        // Return the initial weather forecast since no data is availabel.
         app.updateForecastCard(initialWeatherForecast);
       }
     };
@@ -200,7 +217,8 @@
   };
 
   // TODO add saveSelectedCities function here
-  app.saveSelectedCities = () =>{
+  // Save list of cities to localStorage.
+  app.saveSelectedCities = function() {
     let selectedCities = JSON.stringify(app.selectedCities);
     localStorage.selectedCities = selectedCities;
   };
@@ -214,7 +232,7 @@
       case 33: // fair (night)
       case 34: // fair (day)
       case 36: // hot
-      case 3200: // not available
+      case 3200: // not availabel
         return 'clear-day';
       case 0: // tornado
       case 1: // tropical storm
@@ -310,9 +328,8 @@
     }
   };
   // TODO uncomment line below to test app with fake data
-  //app.updateForecastCard(initialWeatherForecast);
+  // app.updateForecastCard(initialWeatherForecast);
 
-  // TODO add startup code here
   /************************************************************************
    *
    * Code required to start the app
@@ -324,13 +341,14 @@
    *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
    ************************************************************************/
 
+   // TODO add startup code here
    app.selectedCities = localStorage.selectedCities;
-   if(app.selectedCities) {
+   if (app.selectedCities) {
      app.selectedCities = JSON.parse(app.selectedCities);
-     app.selectedCities.forEach(function(city){
-       app.getForecast(city.key, city.lable);
+     app.selectedCities.forEach(function(city) {
+       app.getForecast(city.key, city.label);
      });
-   } else{
+   } else {
      /* The user is using the app for the first time, or the user has not
      * saved any cities, so show the user some fake data. A real app in this
      * scenario could guess the user's location via IP lookup and then inject
@@ -338,7 +356,7 @@
      */
      app.updateForecastCard(initialWeatherForecast);
      app.selectedCities = [
-       {key: initialWeatherForecast.key, lable: initialWeatherForecast.lable}
+       {key: initialWeatherForecast.key, label: initialWeatherForecast.label}
      ];
      app.saveSelectedCities();
    }

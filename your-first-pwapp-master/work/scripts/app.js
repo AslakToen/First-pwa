@@ -1,22 +1,7 @@
-// Copyright 2016 Google Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-
 (function() {
   'use strict';
 
-  var app = {
+  let app = {
     isLoading: true,
     visibleCards: {},
     selectedCities: [],
@@ -46,10 +31,10 @@
 
   document.getElementById('butAddCity').addEventListener('click', function() {
     // Add the newly selected city
-    var select = document.getElementById('selectCityToAdd');
-    var selected = select.options[select.selectedIndex];
-    var key = selected.value;
-    var label = selected.textContent;
+    let select = document.getElementById('selectCityToAdd');
+    let selected = select.options[select.selectedIndex];
+    let key = selected.value;
+    let label = selected.textContent;
     if (!app.selectedCities) {
       app.selectedCities = [];
     }
@@ -83,14 +68,14 @@
   // Updates a weather card with the latest weather forecast. If the card
   // doesn't already exist, it's cloned from the template.
   app.updateForecastCard = function(data) {
-    var dataLastUpdated = new Date(data.created);
-    var sunrise = data.channel.astronomy.sunrise;
-    var sunset = data.channel.astronomy.sunset;
-    var current = data.channel.item.condition;
-    var humidity = data.channel.atmosphere.humidity;
-    var wind = data.channel.wind;
+    let dataLastUpdated = new Date(data.created);
+    let sunrise = data.channel.astronomy.sunrise;
+    let sunset = data.channel.astronomy.sunset;
+    let current = data.channel.item.condition;
+    let humidity = data.channel.atmosphere.humidity;
+    let wind = data.channel.wind;
 
-    var card = app.visibleCards[data.key];
+    let card = app.visibleCards[data.key];
     if (!card) {
       card = app.cardTemplate.cloneNode(true);
       card.classList.remove('cardTemplate');
@@ -103,8 +88,8 @@
     // Verifies the data provide is newer than what's already visible
     // on the card, if it's not bail, if it is, continue and update the
     // time saved in the card
-    var cardLastUpdatedElem = card.querySelector('.card-last-updated');
-    var cardLastUpdated = cardLastUpdatedElem.textContent;
+    let cardLastUpdatedElem = card.querySelector('.card-last-updated');
+    let cardLastUpdated = cardLastUpdatedElem.textContent;
     if (cardLastUpdated) {
       cardLastUpdated = new Date(cardLastUpdated);
       // Bail if the card has more recent data then the data
@@ -126,12 +111,12 @@
     card.querySelector('.current .wind .value').textContent =
       Math.round(wind.speed);
     card.querySelector('.current .wind .direction').textContent = wind.direction;
-    var nextDays = card.querySelectorAll('.future .oneday');
-    var today = new Date();
+    let nextDays = card.querySelectorAll('.future .oneday');
+    let today = new Date();
     today = today.getDay();
-    for (var i = 0; i < 7; i++) {
-      var nextDay = nextDays[i];
-      var daily = data.channel.item.forecast[i];
+    for (let i = 0; i < 7; i++) {
+      let nextDay = nextDays[i];
+      let daily = data.channel.item.forecast[i];
       if (daily && nextDay) {
         nextDay.querySelector('.date').textContent =
           app.daysOfWeek[(i + today) % 7];
@@ -165,8 +150,8 @@
    * freshest data.
    */
   app.getForecast = function(key, label) {
-    var statement = 'select * from weather.forecast where woeid=' + key;
-    var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' +
+    let statement = 'select * from weather.forecast where woeid=' + key;
+    let url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' +
         statement;
     // TODO add cache logic here
     if ('caches' in window) {
@@ -178,7 +163,9 @@
       caches.match(url).then(function(response) {
         if (response) {
           response.json().then(function updateFromCache(json) {
-            var results = json.query.results;
+
+            let results = json.query.results;
+
             results.key = key;
             results.label = label;
             results.created = json.query.created;
@@ -188,12 +175,12 @@
       });
     }
     // Fetch the latest data.
-    var request = new XMLHttpRequest();
+    let request = new XMLHttpRequest();
     request.onreadystatechange = function() {
       if (request.readyState === XMLHttpRequest.DONE) {
         if (request.status === 200) {
-          var response = JSON.parse(request.response);
-          var results = response.query.results;
+          let response = JSON.parse(request.response);
+          let results = response.query.results;
           results.key = key;
           results.label = label;
           results.created = response.query.created;
@@ -210,7 +197,7 @@
 
   // Iterate all of the cards and attempt to get the latest forecast data
   app.updateForecasts = function() {
-    var keys = Object.keys(app.visibleCards);
+    let keys = Object.keys(app.visibleCards);
     keys.forEach(function(key) {
       app.getForecast(key);
     });
@@ -292,7 +279,7 @@
    * or when the user has not saved any cities. See startup code for more
    * discussion.
    */
-  var initialWeatherForecast = {
+  let initialWeatherForecast = {
     key: '2459115',
     label: 'New York, NY',
     created: '2016-07-22T01:00:00Z',
@@ -341,30 +328,32 @@
    *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
    ************************************************************************/
 
-   // TODO add startup code here
-   app.selectedCities = localStorage.selectedCities;
-   if (app.selectedCities) {
-     app.selectedCities = JSON.parse(app.selectedCities);
-     app.selectedCities.forEach(function(city) {
-       app.getForecast(city.key, city.label);
-     });
-   } else {
-     /* The user is using the app for the first time, or the user has not
+
+  // TODO add startup code here
+  app.selectedCities = localStorage.selectedCities;
+  if (app.selectedCities) {
+    app.selectedCities = JSON.parse(app.selectedCities);
+    app.selectedCities.forEach(function(city) {
+      app.getForecast(city.key, city.label);
+    });
+  } else {
+    /* The user is using the app for the first time, or the user has not
      * saved any cities, so show the user some fake data. A real app in this
      * scenario could guess the user's location via IP lookup and then inject
      * that data into the page.
      */
-     app.updateForecastCard(initialWeatherForecast);
-     app.selectedCities = [
-       {key: initialWeatherForecast.key, label: initialWeatherForecast.label}
-     ];
-     app.saveSelectedCities();
-   }
+    app.updateForecastCard(initialWeatherForecast);
+    app.selectedCities = [
+      {key: initialWeatherForecast.key, label: initialWeatherForecast.label}
+    ];
+    app.saveSelectedCities();
+  }
+
 
   // TODO add service worker code here
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
-              .register('./service-worker.js')
-              .then(() => { console.log('Service Worker Registered'); });
+             .register('./service-worker.js')
+             .then(function() { console.log('Service Worker Registered'); });
   }
 })();

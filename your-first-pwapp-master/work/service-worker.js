@@ -60,6 +60,7 @@ self.addEventListener('fetch', function(e) {
   let dataUrl = 'https://query.yahooapis.com/v1/public/yql';
   if (e.request.url.indexOf(dataUrl) > -1) {
     /*
+
      * When the request URL contains dataUrl, the app is asking for fresh
      * weather data. In this case, the service worker always goes to the
      * network and then caches the response. This is called the "Cache then

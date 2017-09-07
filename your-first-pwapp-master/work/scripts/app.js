@@ -163,7 +163,9 @@
       caches.match(url).then(function(response) {
         if (response) {
           response.json().then(function updateFromCache(json) {
+
             let results = json.query.results;
+
             results.key = key;
             results.label = label;
             results.created = json.query.created;
@@ -185,7 +187,7 @@
           app.updateForecastCard(results);
         }
       } else {
-        // Return the initial weather forecast since no data is available.
+        // Return the initial weather forecast since no data is availabel.
         app.updateForecastCard(initialWeatherForecast);
       }
     };
@@ -217,7 +219,7 @@
       case 33: // fair (night)
       case 34: // fair (day)
       case 36: // hot
-      case 3200: // not available
+      case 3200: // not availabel
         return 'clear-day';
       case 0: // tornado
       case 1: // tropical storm
@@ -326,6 +328,7 @@
    *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
    ************************************************************************/
 
+
   // TODO add startup code here
   app.selectedCities = localStorage.selectedCities;
   if (app.selectedCities) {
@@ -345,6 +348,7 @@
     ];
     app.saveSelectedCities();
   }
+
 
   // TODO add service worker code here
   if ('serviceWorker' in navigator) {
